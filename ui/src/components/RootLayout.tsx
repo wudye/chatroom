@@ -1,0 +1,15 @@
+import React from 'react'
+import { Outlet } from 'react-router-dom'
+import AuthListener from './AuthListener'
+import AuthProvider from './AuthProvider'
+
+const RootLayout: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AuthListener />
+      <Outlet />
+    </AuthProvider>
+  )
+}
+
+export default RootLayout
