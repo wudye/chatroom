@@ -1,9 +1,5 @@
-import React from 'react'
-import { Navigate } from 'react-router-dom'
 
-type Props = {
-  children: React.ReactElement
-}
+
 
 const getTokenValue = (): string => {
   const authRaw = localStorage.getItem('auth')
@@ -33,18 +29,19 @@ return <Navigate to={`/login?redirect=${redirect}`} replace />;
 当前 URL： http://example.com/profile
 编码后： http%3A%2F%2Fexample.com%2Fprofile
 最终重定向 URL： /login?redirect=http%3A%2F%2Fexample.com%2Fprofile */
-const RequireAuth: React.FC<Props> = ({ children }) => {
-  const token = getTokenValue()
-  if (!token) {
-    const redirect = encodeURIComponent(window.location.href)
-/*     replace 属性：
-使用 replace 替换当前历史记录，而不是添加新记录。这样用户点击浏览器返回按钮时不会回到未认证的页面。
+type RequireLoginResult = 
+ { needRedirect: boolean; redirectPath: string }
 
-    登录成功后，可以从 redirect 参数中解码出原始 URL，并跳转回去： */
-
-    return <Navigate to={`/login?redirect=${redirect}`} replace />
-  }
-  return children
+const RequireLogin = (
+  pathname: string,
+  search: string = '',
+  publicPaths: string[] = ['/','/login','/register']
+): RequireLoginResult => {
+  // public path allowed
+  if (publicPaths.includes(pathname)) return { needRedirect: false, redirectPath: '' }
+  // allowed if authenticated
+  if (getTokenValue()) return { needRedirect: false, redirectPath: '' }
+  // else require login
+  return { needRedirect: true, redirectPath: `${pathname}${search || ''}` }
 }
-
-export default RequireAuth
+export default RequireLogin

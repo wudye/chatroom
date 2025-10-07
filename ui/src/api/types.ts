@@ -1,4 +1,7 @@
-
+export interface UserLoginParams {
+  userAccount?: string;
+  userPassword?: string;
+}
 
 export interface UserRegisterParams {
     userName: string
@@ -18,3 +21,12 @@ export interface UserRegisterResponse {
     message?: string
 }
     
+
+export interface UserInfo  {
+    id: string,
+    name: string,
+    email: string,
+    avatar: string,
+    groupNum: number,
+    friendNum: number,
+  }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Container,
   Box,
@@ -14,22 +14,23 @@ import {
   Avatar,
 } from '@chakra-ui/react'
 import { useNavigate } from 'react-router-dom'
+import { useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux'
+import  {login} from '../store/authSlice'
+import { userLogin, exchangeCodeForTokens } from '../api/UserController'
 
-
-
-import { userLogin } from '../api/UserController'
-
+import { BACKEND_HOST_LOCAL } from '../api/UrlConfig'
 /**
  * Login page
- * - Two inputs: userAccount and password
- * - Third-party OAuth buttons (GitHub, Google, X)
- * - Login button which posts to /api/user/login (credentials included)
- * - On success redirect to '/'
+ * - Handles standard credential login.
+ * - Handles OAuth2 login flow by redirecting to the backend.
+ * - After successful OAuth, the backend redirects back here with an authorization `code`.
+ *   This component then sends the `code` back to the backend to exchange it for tokens.
  *
  * Notes / assumptions:
- * - Backend login POST endpoint: /api/user/login accepts { userAccount, userPassword }
- * - Backend may return tokenName/tokenValue in JSON or set an HttpOnly cookie. We treat HTTP 2xx as success.
- * - Third-party OAuth endpoints are assumed at: /api/oauth2/authorization/{provider}
+ * - Backend OAuth2 entry point: /api/oauth2/authorization/{provider}
+ * - OAuth provider redirects to: /login?code=...
+ * - Backend token exchange endpoint: /api/auth/token (accepts POST with { code })
  */
 
 const LoginPage: React.FC = () => {
@@ -39,6 +40,8 @@ const LoginPage: React.FC = () => {
   const [lastResponseRaw, setLastResponseRaw] = useState<string | null>(null)
   const toast = useToast()
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const location = useLocation();
 
   const oauthProviders: { id: string; label: string }[] = [
     { id: 'github', label: 'GitHub' },
@@ -46,12 +49,22 @@ const LoginPage: React.FC = () => {
     { id: 'x', label: 'X' },
   ]
 
-  const redirectToProvider = (providerId: string) => {
-    // Assumption: backend provides an OAuth endpoint under /api/oauth2/authorization/:provider
-    const url = `/api/oauth2/authorization/${providerId}`
-    // Use full navigation so the server can set cookies / start the OAuth flow
-    window.location.href = url
-  }
+
+      // 检查 accessToken 并重定向
+  useEffect(() => {
+        const accessToken = localStorage.getItem("accessToken");
+        if (accessToken) {
+            const from = location.state?.from?.pathname || '/';
+            navigate(from, { replace: true });
+        }
+    }, [navigate, location.state]);
+  // This function's only job is to redirect the user to the backend OAuth endpoint.
+  const handleOAuthLogin = (providerId: string) => {
+   // const url = `${BACKEND_HOST_LOCAL}/oauth2/authorization/${providerId}`;
+
+    const url = `/api/oauth2/authorization/${providerId}`;
+    window.location.href = url;
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -62,13 +75,25 @@ const LoginPage: React.FC = () => {
     setLoading(true)
     try {
    
-      await userLogin({ userAccount, userPassword })
+      const data =  await userLogin({ userAccount, userPassword })
+      if (!data || !data.accessToken) {
+              toast({ title: 'Login failed', status: 'error', duration: 3000 })
 
+              
+          
+      } else {
+         localStorage.setItem('accessToken', data?.accessToken || '')
+        localStorage.setItem('refreshToken', data?.refreshToken || '')
+        // Prefer Authorization
+        localStorage.setItem('auth', JSON.stringify({ accessToken: data?.accessToken || '' }));
+
+      dispatch(login());
         toast({ title: 'Login successful', status: 'success', duration: 2000 })
         // clear any previous debug response
         setLastResponseRaw(null)
-        navigate('/profile', { replace: true })
-        return
+//        const from = location.state?.from?.pathname || '/chatnav';
+        navigate("/", { replace: true });
+      }
     } catch (err: any) {
 
       setLastResponseRaw(err?.response?.data ?? null)
@@ -129,7 +154,7 @@ const LoginPage: React.FC = () => {
                 <Button
                   key={p.id}
                   variant="outline"
-                  onClick={() => redirectToProvider(p.id)}
+                  onClick={() => handleOAuthLogin(p.id)}
                   className="text-sm"
                 >
                   {p.label}

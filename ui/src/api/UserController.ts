@@ -1,6 +1,28 @@
 import axios from "axios"
-import type { UserRegisterParams, UserRegisterResponse } from "./types"
+import type { UserLoginParams, UserRegisterParams, UserRegisterResponse } from "./types"
+import  {BACKEND_HOST_LOCAL} from "./UrlConfig"
 
+export const saveAuthInfo = (authInfo: { accessToken: string; refreshToken: string }) => {
+  const authData = {
+    accessToken: authInfo.accessToken,
+    refreshToken: authInfo.refreshToken,
+  };
+  localStorage.setItem('auth', JSON.stringify(authData));
+};
+
+export const exchangeCodeForTokens = async () => {
+  // This request sends the authorization code to the backend.
+  // The backend will exchange it for access and refresh tokens.
+  const response = await axios.get(`${BACKEND_HOST_LOCAL}/api/auth/token`,  { withCredentials: true });
+  const { accessToken, refreshToken } = response.data;
+
+  if (!accessToken || !refreshToken) {
+    throw new Error('Could not retrieve tokens from server after exchanging code.');
+  }
+
+  saveAuthInfo({ accessToken, refreshToken });
+  return response.data;
+};
 
 
 export const userRegister = async  (params: UserRegisterParams) : Promise<UserRegisterResponse> => {
@@ -14,10 +36,10 @@ export const userRegister = async  (params: UserRegisterParams) : Promise<UserRe
 
     1. fetch 的 ok 属性
     作用： res.ok 是一个布尔值，表示 HTTP 请求是否成功（状态码在 200-299 范围内）。 */
-    const res = await fetch('/api/user/register', {
+    const res = await fetch(`${BACKEND_HOST_LOCAL}/api/user/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-          credentials: 'include', // ensure browser saves cookie from Set-Cookie
+       //   credentials: 'include', // ensure browser saves cookie from Set-Cookie
         body: JSON.stringify(params),
         }) 
 /* 
@@ -31,6 +53,10 @@ export const userRegister = async  (params: UserRegisterParams) : Promise<UserRe
                 data = {}
             }
             } */
+
+            console.log('Raw fetch response:', res);
+            console.log('Response status:', res.status);
+            console.log('Response ok:', `${BACKEND_HOST_LOCAL}/api/auth/register`);
 
     
         let data: any = {}
@@ -123,27 +149,29 @@ interface GetLogInUser {
 
 export const userGetLogin = async(): Promise<GetLogInUser> => {
     try {
-        const response = await fetch(
-            '/api/user/get/login',
-            {
-                method: 'GET',
-                credentials: 'include', // this will send cookies
-                headers: { 'Content-Type': 'application/json' },
-            },
+        const accessToken = localStorage.getItem('accessToken') || ''
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+        if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`
+        console.log('Using Access Token:', accessToken);
+        const response = await axios.get(
+           `${BACKEND_HOST_LOCAL}/api/user/get/login`,
+            { headers, withCredentials: true }
         )
-        if (!response.ok) {
-            const data = await response.json().catch(() => ({}))
+        console.log('Raw axios response:', response);
+        console.log('Response status:', response.status);
+        console.log('Response data:', `${BACKEND_HOST_LOCAL}/api/user/get/login`);
+        if (!response) {
             return {
-                userName: data?.userName ?? '',
-                email: data?.email ?? '',
-                userAccount: data?.userAccount ?? '',
+                userName: '',
+                email: '',
+                userAccount: '',
             }
         }
-        const data = await response.json().catch(() => ({}))
+        const data: any = response.data
         return {
-            userName: data?.userName ?? '',
-            email: data?.email ?? '',
-            userAccount: data?.userAccount ?? '',
+            userName: data?.userName || '',
+            email: data?.email || '',
+            userAccount: data?.userAccount || '',
         }
     } catch (err: unknown) {
         return {
@@ -182,10 +210,6 @@ export async function fetchProfile() {
   }
 } */
 
-  interface UserLoginParams {
-    userAccount: string
-    userPassword: string
-  }
   interface UserLoginResponse {
     accessToken?: string
     refreshToken?: string
@@ -199,7 +223,7 @@ export async function fetchProfile() {
             if (localjwt) headers['Authorization'] = `Bearer ${localjwt}`
        
             const res = await axios.post<UserLoginResponse>(
-            '/api/user/login/my',
+           `${BACKEND_HOST_LOCAL}/api/user/login`,
             params,
             {
                 headers,
@@ -207,10 +231,8 @@ export async function fetchProfile() {
             },
         )
         const data = res.data
-        localStorage.setItem('accessToken', data?.accessToken || '')
-        localStorage.setItem('refreshToken', data?.refreshToken || '')
-        // Prefer Authorization
-        localStorage.setItem('auth', JSON.stringify({ accessToken: data?.accessToken || '' }));
+        console.log('Login response data:', data);
+   
 /*        
         with the interceptors in setupAxiosAuth.ts, this line is optional but ensures immediate header update
 (axios.defaults.headers.common as any)['Authorization'] = `Bearer ${data?.accessToken || ''}`

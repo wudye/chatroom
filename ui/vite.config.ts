@@ -13,8 +13,9 @@ export default defineConfig({
         target: 'http://localhost:8869',
         changeOrigin: true,
         secure: false,
+        // Remove the /api prefix when forwarding so backend sees the original paths
+        rewrite: (path) => path.replace(/^\/api/, ''),
         // optional: rewrite the path if your backend doesn't expect the /api prefix
-        // rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },

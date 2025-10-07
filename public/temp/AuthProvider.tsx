@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import setupAxiosAuth from '../lib/setupAxiosAuth'
+import setupAxiosAuth from './setupAxiosAuth'
 
 const AuthProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   useEffect(() => {

@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+
+
+:root {
+  --color-primary: #FFA768;
+  --header-selected-color: #FFA768;
+  --header-height: 64px;
+  --app-title: "微狗🐶";
+  --logo-url: url('https://img0.baidu.com/it/u=1455188211,4132484470&fm=253&app=138&size=w931&n=0&f=JPEG');
+}
+
+/* optional demo */
+.app-header {
+  height: var(--header-height);
+  background: var(--color-primary);
+}

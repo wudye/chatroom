@@ -2,7 +2,19 @@ import axios from 'axios'
 
 export type SetupOptions = {
   publicPaths?: string[]
+  loginPath?: string
 }
+/* 
+功能说明
+getAuthToken 
+从 localStorage 中获取存储的 Token。
+请求拦截器：
+在每次请求前自动添加 Authorization 头。
+响应拦截器：
+拦截 401 错误，跳转到登录页。
+使用示例
+在其他文件中导入并使用配置好的 Axios 实例： 
+*/
 
 /**
  * Install axios request/response interceptors to attach Authorization header
@@ -16,6 +28,7 @@ export function setupAxiosAuth(options?: SetupOptions) {
     '/api/user/get/login',
     '/api/oauth2/authorization',
   ]
+  const loginPath = options?.loginPath ?? '/login'
 
   const reqInterceptor = axios.interceptors.request.use((config) => {
     try {
@@ -40,8 +53,12 @@ export function setupAxiosAuth(options?: SetupOptions) {
       }
 
       if (!token) {
-        // Not authenticated — emit an event carrying only the app-relative path (pathname + search).
-        const redirectPath = window.location.pathname + window.location.search
+        // Not authenticated — if the user is already on the login page, do not emit another redirect event.
+        const currentPath = window.location.pathname || ''
+        const redirectPath = currentPath + window.location.search
+        if (currentPath === loginPath) {
+          return Promise.reject(new Error('Not authenticated'))
+        }
         window.dispatchEvent(new CustomEvent('auth:logout', { detail: { redirectPath } }))
         return Promise.reject(new Error('Not authenticated'))
       }
@@ -63,8 +80,11 @@ export function setupAxiosAuth(options?: SetupOptions) {
         localStorage.removeItem('auth')
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')
-  const redirectPath = window.location.pathname + window.location.search
-  window.dispatchEvent(new CustomEvent('auth:logout', { detail: { redirectPath } }))
+        const currentPath = window.location.pathname || ''
+        const redirectPath = currentPath + window.location.search
+        if (currentPath !== loginPath) {
+          window.dispatchEvent(new CustomEvent('auth:logout', { detail: { redirectPath } }))
+        }
       }
       return Promise.reject(error)
     },
