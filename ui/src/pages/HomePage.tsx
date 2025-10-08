@@ -8,6 +8,8 @@ const HomePage: React.FC = () => {
   const accessToken = localStorage.getItem("accessToken");
   console.log("HomePage accessToken: ===", accessToken);
   const isLoggedIn = useSelector((state:any) => state.auth?.isLoggedIn)
+  const userRole = useSelector((state:any) => state.auth?.userRole)
+
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
@@ -47,6 +49,11 @@ const HomePage: React.FC = () => {
             ) : (
               <Link to="/login" >
                 <Button colorScheme="orange" variant="outline" size="sm">登录</Button>
+              </Link>
+            )}
+            {isLoggedIn && userRole === 'admin' && (
+              <Link to="/manager">
+                <Button colorScheme="blue" variant="solid" size="sm">Manager</Button>
               </Link>
             )}
          

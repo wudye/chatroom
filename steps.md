@@ -111,6 +111,36 @@
 
 
 # redis session config
+    spring session set expiration time in application and @Bean config did not work(?)
+    but with this works @EnableRedisHttpSession(maxInactiveIntervalInSeconds = 3000)
+    then start session auth step
+    1. 登录成功后，在 Session 中设置登录标识（如 userAccount）。login api
+    2. 每次接口请求，先获取 Session 并检查登录标识是否存在。every api
+    3. 如果 Session 过期或未登录，返回 401（未认证）。every api
+    4. 前端拦截 401，自动跳转登录页或清理本地登录状态。frontend global main.tsx
+    this 1,2,3 step can use spring security replace . login
+    Spring Security 使用 Session 检查认证状态的原理如下：
+        登录成功后，认证信息存入 Session
+        用户登录成功，Spring Security 会将 Authentication 对象（包含用户信息和权限）存入 Session（默认是 HttpSession），并在 SecurityContextHolder 里保存。
+        每次请求自动读取 Session 认证信息
+        后续请求时，Spring Security 的过滤器链会自动从 Session 读取 Authentication，判断用户是否已认证。
+        未认证时自动跳转或返回未登录响应
+        如果 Session 里没有认证信息（比如 Session 过期或未登录），访问受保护接口时会触发 AuthenticationEntryPoint，返回未登录提示或跳转到登录页。
+        Session 失效即丢失认证状态
+        用户登出或 Session 超时，认证信息会被清除，后续请求即视为未登录
+    流程简述：
+        登录成功：SecurityContextHolder.getContext().setAuthentication(...)，并存入 Session。
+        每次请求：Spring Security 自动检查 Session 是否有认证信息。
+        无认证信息：触发未登录处理逻辑。
+    这种机制适合传统 Web 应用（如表单登录），前后端分离场景常用 JWT 替代 Session。
+    so the only need to do is to set the  in SecurityFilterChain bean
+               .exceptionHandling(
+                        except->
+                                except.authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("未登录或会话已过期");
+                })
+                );
 # redis caffeine cache config
 # thread
 

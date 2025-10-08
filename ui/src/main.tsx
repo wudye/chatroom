@@ -6,7 +6,26 @@ import App from './App.tsx'
 import { Provider } from 'react-redux';
 import { store } from './store/store';
 import { initializeAuthState } from './store/authSlice';
+/* import setupAxiosInterceptors from './utils/axiosInterceptor';
+setupAxiosInterceptors();
 
+ */
+
+import axios from 'axios';
+
+// 添加响应拦截器
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response && error.response.status === 401) {
+      // Session 失效，自动跳转登录页
+      window.location.href = '/login';
+      // 可选：清理本地登录状态
+      // localStorage.removeItem('token');
+    }
+    return Promise.reject(error);
+  }
+);
 store.dispatch(initializeAuthState());
 
 createRoot(document.getElementById('root')!).render(

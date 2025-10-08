@@ -18,6 +18,7 @@ import RegisterPage from './pages/RegisterPage'
 import LoginPage from './pages/LoginPage'
 import ProfilePage from './pages/ProfilePage'
 import LogoutPage from './components/Logout'
+import ManagePage from './pages/ManagerPage'
 /* import RootLayout from './auth/RootLayout' */
 
 // App.tsx
@@ -72,6 +73,7 @@ const router = createBrowserRouter([
           { path: '/chatnav', element: <ChatNavPage /> },
 
           { path: '/logout', element: <LogoutPage /> },
+                   { path: '/manager', element: <ManagePage /> },
         ],
       },
     ],

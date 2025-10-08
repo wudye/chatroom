@@ -1,0 +1,41 @@
+import React from 'react';
+import { Flex, Box, Button, Menu, MenuButton, MenuList, MenuItem, Text } from '@chakra-ui/react';
+
+const DiscordLikeUI: React.FC = () => {
+    return (
+        <Flex height="100vh" width="100vw">
+            {/* 第一栏：小栏 */}
+            <Box width="72px" bg="gray.800" p={2}>
+                <Box mb={4}>
+                    <Text color="white" fontSize="sm" mb={2}>friendList</Text>
+                    <Button size="sm" colorScheme="blue">添加</Button>
+                </Box>
+                <Box mb={4}>
+                    <Text color="white" fontSize="sm" mb={2}>群组</Text>
+                    <Text color="white" fontSize="sm">gbo</Text>
+                </Box>
+                <Menu>
+                    <MenuButton as={Button} size="sm" colorScheme="gray" mt="auto">
+                        用户
+                    </MenuButton>
+                    <MenuList>
+                        <MenuItem>资料</MenuItem>
+                        <MenuItem>注销</MenuItem>
+                    </MenuList>
+                </Menu>
+            </Box>
+
+            {/* 第二栏：中栏 */}
+            <Box width="240px" bg="gray.700" p={2}>
+                <Text color="white">群组详情</Text>
+            </Box>
+
+            {/* 第三栏：大栏 */}
+            <Box flex={1} bg="gray.600" p={4}>
+                <Text color="white">对话内容</Text>
+            </Box>
+        </Flex>
+    );
+};
+
+export default DiscordLikeUI;
