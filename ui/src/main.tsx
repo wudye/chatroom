@@ -6,14 +6,14 @@ import App from './App.tsx'
 import { Provider } from 'react-redux';
 import { store } from './store/store';
 import { initializeAuthState } from './store/authSlice';
-/* import setupAxiosInterceptors from './utils/axiosInterceptor';
-setupAxiosInterceptors();
 
- */
+// Environment setup
 
+
+// Import axios after environment setup
 import axios from 'axios';
 
-// 添加响应拦截器
+/* // 添加响应拦截器 this is for session timeout handling when bakcend returns 401 Unauthorized because session expired
 axios.interceptors.response.use(
   response => response,
   error => {
@@ -21,11 +21,21 @@ axios.interceptors.response.use(
       // Session 失效，自动跳转登录页
       window.location.href = '/login';
       // 可选：清理本地登录状态
-      // localStorage.removeItem('token');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('auth');
+      store.dispatch({ type: 'auth/logout' }); // 假设你有一个 logout action
+      console.log('Session expired, redirecting to login.');
     }
     return Promise.reject(error);
   }
-);
+); */
+
+import setupAxiosAuth from './auth/setupAxiosAuth.ts'
+setupAxiosAuth();
+
+// Initialize auth state from localStorage when the app starts
+// This ensures that the Redux store is in sync with any existing auth tokens in localStorage
 store.dispatch(initializeAuthState());
 
 createRoot(document.getElementById('root')!).render(

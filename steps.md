@@ -133,7 +133,7 @@
         每次请求：Spring Security 自动检查 Session 是否有认证信息。
         无认证信息：触发未登录处理逻辑。
     这种机制适合传统 Web 应用（如表单登录），前后端分离场景常用 JWT 替代 Session。
-    so the only need to do is to set the  in SecurityFilterChain bean
+    so the only need to do is to set the  in SecurityFilterChain beannp
                .exceptionHandling(
                         except->
                                 except.authenticationEntryPoint((request, response, authException) -> {

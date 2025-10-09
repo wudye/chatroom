@@ -60,9 +60,9 @@ const LoginPage: React.FC = () => {
     }, [navigate, location.state]);
   // This function's only job is to redirect the user to the backend OAuth endpoint.
   const handleOAuthLogin = (providerId: string) => {
-   // const url = `${BACKEND_HOST_LOCAL}/oauth2/authorization/${providerId}`;
+   const url = `${BACKEND_HOST_LOCAL}/oauth2/authorization/${providerId}`;
 
-    const url = `/api/oauth2/authorization/${providerId}`;
+  //  const url = `/api/oauth2/authorization/${providerId}`;
     window.location.href = url;
   };
 

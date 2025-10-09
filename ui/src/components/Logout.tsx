@@ -13,6 +13,9 @@ const Logout = () => {
   
   const handleLogout = () => {
     dispatch(logout())
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+    localStorage.removeItem('auth')
     navigate('/', { replace: true })
   }
 

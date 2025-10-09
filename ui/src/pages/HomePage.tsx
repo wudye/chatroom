@@ -3,26 +3,16 @@ import { Box, Flex, Button, Heading, Text, Container, Stack, Menu, MenuButton, M
 import { Link, useNavigate } from 'react-router-dom'
 import Footer from '../components/Footer'
 import { useSelector, useDispatch } from 'react-redux'
+
 const HomePage: React.FC = () => {
 
-  const accessToken = localStorage.getItem("accessToken");
-  console.log("HomePage accessToken: ===", accessToken);
-  const isLoggedIn = useSelector((state:any) => state.auth?.isLoggedIn)
+
+ const isLoggedIn = useSelector((state:any) => state.auth?.isLoggedIn)
   const userRole = useSelector((state:any) => state.auth?.userRole)
 
-  const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  const handleLogoutClick = () => {
-    try {
-      dispatch({ type: 'auth/logout' })
-      localStorage.removeItem('accessToken')
-      localStorage.removeItem('refreshToken')
-      localStorage.removeItem('auth')
-    } finally {
-      navigate('/', { replace: true })
-    }
-  }
+
 
  
 
@@ -43,7 +33,7 @@ const HomePage: React.FC = () => {
                 <MenuButton as={Button} variant="ghost">user</MenuButton>
                 <MenuList>
                   <MenuItem as={Link} to="/profile">Profile</MenuItem>
-                  <MenuItem onClick={handleLogoutClick}>Logout</MenuItem>
+                  <MenuItem  onClick={() => navigate('/logout')}>Logout</MenuItem>
                 </MenuList>
               </Menu>
             ) : (

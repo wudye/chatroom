@@ -31,6 +31,7 @@ export function setupAxiosAuth(options?: SetupOptions) {
 
   const reqInterceptor = axios.interceptors.request.use((config) => {
     try {
+  
       const url = (config.url || '') as string
 
       // If the request is targeting a public path, skip auth check
@@ -64,30 +65,30 @@ export function setupAxiosAuth(options?: SetupOptions) {
 
       config.headers = config.headers || {}
       ;(config.headers as any)['Authorization'] = `Bearer ${token}`
+      config.withCredentials = true
+
+      console.log('Document.cookie:', document.cookie);
       return config
     } catch (err) {
       return Promise.reject(err)
     }
   })
 
-  const respInterceptor = axios.interceptors.response.use(
-    (res) => res,
-    (error) => {
-      const status = error?.response?.status
-      if (status === 401 || status === 403) {
-        // Clear local auth and notify app to navigate to login (SPA style)
-        localStorage.removeItem('auth')
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
-        const currentPath = window.location.pathname || ''
-        const redirectPath = currentPath + window.location.search
-        if (currentPath !== loginPath) {
-          window.dispatchEvent(new CustomEvent('auth:logout', { detail: { redirectPath } }))
-        }
-      }
-      return Promise.reject(error)
-    },
-  )
+
+  const respInterceptor =   axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response && error.response.status === 401) {
+      // Session 失效，自动跳转登录页
+      window.location.href = '/login';
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('auth');
+
+    }
+    return Promise.reject(error);
+  }
+);  
 
   return () => {
     axios.interceptors.request.eject(reqInterceptor)
