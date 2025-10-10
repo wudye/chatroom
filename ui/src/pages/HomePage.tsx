@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Box, Flex, Button, Heading, Text, Container, Stack, Menu, MenuButton, MenuList, MenuItem } from '@chakra-ui/react'
 import { Link, useNavigate } from 'react-router-dom'
 import Footer from '../components/Footer'
@@ -7,10 +7,16 @@ import { useSelector, useDispatch } from 'react-redux'
 const HomePage: React.FC = () => {
 
 
- const isLoggedIn = useSelector((state:any) => state.auth?.isLoggedIn)
-  const userRole = useSelector((state:any) => state.auth?.userRole)
+  const navigate = useNavigate();
 
-  const navigate = useNavigate()
+  // Use useSelector at the top level
+  const isLoggedIn = useSelector((state: any) => state.auth?.isLoggedIn);
+  //const userRole = useSelector((state: any) => state.auth?.user?.userRole);
+
+  const userRole = localStorage.getItem('userRole') || 'user'; // default to 'guest' if not found
+  
+  console.log('isLoggedIn:', isLoggedIn);
+  console.log('userRole:', userRole);
 
 
 
@@ -22,14 +28,20 @@ const HomePage: React.FC = () => {
       <Box as="nav" bg="gray.50" px={6} py={3} boxShadow="sm">
         <Container maxW="7xl" display="flex" alignItems="center" justifyContent="space-between">
           <Heading as="h1" size="md">Chatroom</Heading>
-          <Stack direction="row" spacing={3}>
-               <Link to="/chatnav">
+            <Stack direction="row" spacing={16} align="center">
+              <Link to="/chatnav">
               <Button colorScheme="teal" variant="solid" size="sm">Chat</Button>
             </Link>
+              {isLoggedIn && userRole === 'ADMIN' && (
+              <Link to="/manager">
+                <Button colorScheme="blue" variant="solid" size="sm">Manager</Button>
+              </Link>
+            )}
+         
             {isLoggedIn ? (
              
               <Menu>
-                 <p>login already</p>
+          
                 <MenuButton as={Button} variant="ghost">user</MenuButton>
                 <MenuList>
                   <MenuItem as={Link} to="/profile">Profile</MenuItem>
@@ -41,12 +53,7 @@ const HomePage: React.FC = () => {
                 <Button colorScheme="orange" variant="outline" size="sm">登录</Button>
               </Link>
             )}
-            {isLoggedIn && userRole === 'admin' && (
-              <Link to="/manager">
-                <Button colorScheme="blue" variant="solid" size="sm">Manager</Button>
-              </Link>
-            )}
-         
+    
               
           </Stack>
         </Container>

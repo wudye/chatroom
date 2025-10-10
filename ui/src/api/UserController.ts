@@ -213,6 +213,7 @@ export async function fetchProfile() {
   interface UserLoginResponse {
     accessToken?: string
     refreshToken?: string
+    userRole?: string
     message?: string
   }
 
@@ -239,6 +240,7 @@ export async function fetchProfile() {
  */        return {
             accessToken: data?.accessToken,
             refreshToken: data?.refreshToken,
+            userRole: data?.userRole,
             message: data?.message,
         }
     } catch (err: unknown) {
@@ -247,12 +249,14 @@ export async function fetchProfile() {
             return {
                 accessToken: undefined,
                 refreshToken: undefined,
+                userRole: undefined,
                 message: (data && data.message) ? data.message : '登录失败，请重试',
             }
         }
         return {
             accessToken: undefined,
             refreshToken: undefined,
+            userRole: undefined,
             message: err instanceof Error ? err.message : 'An unexpected error occurred',
         }
     }

@@ -28,6 +28,8 @@ import ManagePage from './pages/ManagerPage'
 import ProtectedRouter from './auth/ProtectedRouter'
 import RootLayout from './auth/RootLayout'
 import LoginSuccess from './auth/LoginSuccess'
+import PageShow from './pages/PageShow'
+
 
 /* export interface AppProps {
   settings: typeof Settings;
@@ -57,6 +59,8 @@ const router = createBrowserRouter([
       { path: '/register', element: <RegisterPage /> },
       { path: '/login', element: <LoginPage /> },
       { path: '/login/success', element: <LoginSuccess /> },
+                   { path: '/test', element: <PageShow /> },
+
 /* 
       // Protected routes use DemoRequireLoginChild as an element that wraps an Outlet
       {
@@ -73,7 +77,7 @@ const router = createBrowserRouter([
           { path: '/chatnav', element: <ChatNavPage /> },
 
           { path: '/logout', element: <LogoutPage /> },
-                   { path: '/manager', element: <ManagePage /> },
+          { path: '/manager', element: <ManagePage /> },
         ],
       },
     ],

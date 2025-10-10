@@ -29,4 +29,5 @@ export interface UserInfo  {
     avatar: string,
     groupNum: number,
     friendNum: number,
+    userRole: string,
   }

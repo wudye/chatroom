@@ -249,7 +249,7 @@ const DiscordLikeUI: React.FC = () => {
     return (
         <Flex className="h-screen w-screen">
             {/* 第一栏：小栏 */}
-            <Box className="w-16 bg-gray-800 p-2 flex flex-col">
+            <Box className="w-26 bg-gray-800 p-2 flex flex-col">
                 {/* 好友列表按钮 */}
                 <Box mb={4}>
                     <Text
@@ -259,7 +259,7 @@ const DiscordLikeUI: React.FC = () => {
                         }}
                         onClick={handleClickFirstBarFriends}
                     >
-                        好友列表
+                        friendList
                         {unreadCountInFirstBar > 0 && (
                             <Box as="span" ml={2} color="red.500">
                                 {unreadCountInFirstBar}

@@ -1,5 +1,7 @@
 import axios from 'axios'
 
+import { useDispatch } from 'react-redux'
+import {logout} from '../store/authSlice'
 export type SetupOptions = {
   publicPaths?: string[]
   loginPath?: string
@@ -28,6 +30,7 @@ export function setupAxiosAuth(options?: SetupOptions) {
     '/oauth2/authorization',
   ]
   const loginPath = options?.loginPath ?? '/login'
+
 
   const reqInterceptor = axios.interceptors.request.use((config) => {
     try {
@@ -79,11 +82,29 @@ export function setupAxiosAuth(options?: SetupOptions) {
   response => response,
   error => {
     if (error.response && error.response.status === 401) {
-      // Session 失效，自动跳转登录页
+
+      // try refresh token logic could be added here
+      async function tryRefreshToken() {
+        const refreshToken = localStorage.getItem('refreshToken') || ''
+        if (refreshToken) {
+          try {
+            const response = await axios.post('/api/auth/refresh', { refreshToken })
+            const newAccessToken = response.data?.accessToken || ''
+            if (newAccessToken) {
+              localStorage.setItem('accessToken', newAccessToken)
+              return true
+            }
+          } catch (err) {
+            console.error('Failed to refresh token:', err)
+          }
+      }
+    }
+    const dispatch = useDispatch()
+    dispatch(logout()); 
+    // Session 失效，自动跳转登录页
       window.location.href = '/login';
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('auth');
+      // 可选：清理本地登录状态
+      
 
     }
     return Promise.reject(error);

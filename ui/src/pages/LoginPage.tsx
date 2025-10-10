@@ -16,7 +16,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux'
-import  {login} from '../store/authSlice'
+import  {login, setUserRole} from '../store/authSlice'
 import { userLogin, exchangeCodeForTokens } from '../api/UserController'
 
 import { BACKEND_HOST_LOCAL } from '../api/UrlConfig'
@@ -86,6 +86,8 @@ const LoginPage: React.FC = () => {
         localStorage.setItem('refreshToken', data?.refreshToken || '')
         // Prefer Authorization
         localStorage.setItem('auth', JSON.stringify({ accessToken: data?.accessToken || '' }));
+        dispatch(setUserRole(data?.userRole || 'user'));
+        localStorage.setItem('userRole', data?.userRole || 'user');
 
       dispatch(login());
         toast({ title: 'Login successful', status: 'success', duration: 2000 })
